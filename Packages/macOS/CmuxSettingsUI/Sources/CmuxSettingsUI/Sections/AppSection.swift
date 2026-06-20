@@ -1,4 +1,5 @@
 import AppKit
+import CmuxFoundation
 import CmuxSettings
 import SwiftUI
 import UniformTypeIdentifiers
@@ -211,13 +212,30 @@ public struct AppSection: View {
                 String(localized: "settings.app.defaultWorkspacePath", defaultValue: "Default Workspace Directory"),
                 subtitle: String(localized: "settings.app.defaultWorkspacePath.subtitle", defaultValue: "New workspaces open here instead of inheriting the current workspace's directory. Supports ~ and environment variables. Leave empty to use the last-used directory.")
             ) {
-                TextField(
-                    String(localized: "settings.app.defaultWorkspacePath.placeholder", defaultValue: "e.g. ~/workspace"),
-                    text: Binding(get: { defaultWorkspacePath.current }, set: { defaultWorkspacePath.set($0) })
-                )
-                .textFieldStyle(.roundedBorder)
-                .frame(width: 200)
-                .accessibilityIdentifier("SettingsDefaultWorkspacePathField")
+                VStack(alignment: .trailing, spacing: 6) {
+                    TextField(
+                        String(localized: "settings.app.defaultWorkspacePath.placeholder", defaultValue: "e.g. ~/workspace"),
+                        text: Binding(get: { defaultWorkspacePath.current }, set: { defaultWorkspacePath.set($0) })
+                    )
+                    .textFieldStyle(.roundedBorder)
+                    .frame(width: 200)
+                    .accessibilityIdentifier("SettingsDefaultWorkspacePathField")
+
+                    if let warning = defaultWorkspacePathWarning {
+                        HStack(alignment: .firstTextBaseline, spacing: 6) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                            Text(warning)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.leading)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(width: 200, alignment: .leading)
+                        .accessibilityIdentifier("SettingsDefaultWorkspacePathWarning")
+                    }
+                }
             }
             SettingsCardDivider()
 
@@ -845,6 +863,28 @@ public struct AppSection: View {
                 defaultValue: "Append new workspaces to the bottom of the list."
             )
         }
+    }
+
+    /// Non-blocking warning shown under the Default Workspace Directory field
+    /// when the configured path (after `~`/`$VAR` expansion) is not an existing
+    /// directory. Uses the same expansion as the runtime resolver so the UI and
+    /// new-workspace behavior agree. `nil` when empty or valid.
+    private var defaultWorkspacePathWarning: String? {
+        let raw = defaultWorkspacePath.current.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !raw.isEmpty else { return nil }
+        let expanded = NewWorkspaceWorkingDirectory.expand(
+            raw,
+            homeDirectory: NSHomeDirectory(),
+            environment: ProcessInfo.processInfo.environment
+        )
+        var isDirectory: ObjCBool = false
+        let exists = FileManager.default.fileExists(atPath: expanded, isDirectory: &isDirectory)
+            && isDirectory.boolValue
+        guard !exists else { return nil }
+        return String(
+            localized: "settings.app.defaultWorkspacePath.invalidWarning",
+            defaultValue: "Not an existing folder. New workspaces use the last-used directory until this is fixed."
+        )
     }
 
     private func fileDropSubtitle(_ behavior: FileDropDefaultBehavior) -> String {
