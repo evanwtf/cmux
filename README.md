@@ -142,7 +142,7 @@ Give a million developers composable primitives and they'll collectively find th
 
 For more info on how to configure cmux, [head over to our docs](https://cmux.com/docs/getting-started?utm_source=readme).
 
-**Building from source / contributing?** Start with [`docs/repository.md`](docs/repository.md) for the monorepo map, tech stack, architecture, and verified build/test commands, then [`CONTRIBUTING.md`](CONTRIBUTING.md) for the local macOS-app build loop. Agent build notes and pitfalls are in [`CLAUDE.md`](CLAUDE.md).
+**Building from source?** Clone with submodules and run `./scripts/build-macos.sh` — one command, no flags, builds the macOS app and prints the path to open. See [`docs/repository.md`](docs/repository.md) for the monorepo map, tech stack, architecture, and verified build/test commands, and [`CONTRIBUTING.md`](CONTRIBUTING.md) for the iterative build loop. Agent build notes and pitfalls are in [`CLAUDE.md`](CLAUDE.md).
 
 ## Keyboard Shortcuts
 

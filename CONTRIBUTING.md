@@ -12,27 +12,31 @@ This page covers macOS-app development. For the web/cloud backend see [`web/READ
 
 ## Getting Started
 
-1. Clone the repository with submodules:
-   ```bash
-   git clone --recursive https://github.com/manaflow-ai/cmux.git
-   cd cmux
-   ```
+Clone the repository with submodules and build with a single command:
 
-2. Run the setup script:
+```bash
+git clone --recursive https://github.com/manaflow-ai/cmux.git
+cd cmux
+./scripts/build-macos.sh
+```
+
+`build-macos.sh` takes no flags: it runs setup (submodules, `GhosttyKit.xcframework`, git hooks) and builds an isolated Debug app, then prints an `App path:` line you can cmd-click to open. Re-run it any time to rebuild (subsequent runs are incremental). It tags the build `local` by default; set `CMUX_TAG=<name>` for a second isolated build.
+
+### Iterative development
+
+For ongoing work, run the two steps directly so each branch/agent gets its own isolated build:
+
+1. One-time setup:
    ```bash
    ./scripts/setup.sh
    ```
+   Initializes git submodules (`ghostty`, `homebrew-cmux`, `vendor/bonsplit`), builds or reuses the cached `GhosttyKit.xcframework`, and installs the pbxproj-normalization pre-commit hook.
 
-   This will:
-   - Initialize git submodules (`ghostty`, `homebrew-cmux`, `vendor/bonsplit`)
-   - Build or reuse the cached `GhosttyKit.xcframework`
-   - Install the pbxproj-normalization pre-commit hook
-
-3. Build the debug app:
+2. Build under a per-branch tag:
    ```bash
    ./scripts/reload.sh --tag my-feature
    ```
-   The script prints the `App path:` line. Cmd-click to open, or pass `--launch` to open automatically. Always build through `reload.sh --tag <tag>`; never run a bare `xcodebuild` or open an untagged `cmux DEV.app` (untagged builds share the default debug socket/bundle ID and steal focus). See [`CLAUDE.md`](CLAUDE.md) for the tagged-build rationale and the `cmux-debug-cli.sh` dogfood helper.
+   Cmd-click the printed `App path:`, or pass `--launch` to open automatically. Always build through `reload.sh --tag <tag>`; never run a bare `xcodebuild` or open an untagged `cmux DEV.app` (untagged builds share the default debug socket/bundle ID and steal focus). See [`CLAUDE.md`](CLAUDE.md) for the tagged-build rationale and the `cmux-debug-cli.sh` dogfood helper.
 
 ## Building on macOS 26+ (Tahoe)
 
@@ -42,6 +46,7 @@ The pinned compiler **zig 0.15.2 cannot link the Ghostty CLI helper against the 
 
 | Script | Description |
 |--------|-------------|
+| `./scripts/build-macos.sh` | One command, no flags: setup + build an isolated Debug app (tag `local`) |
 | `./scripts/setup.sh` | One-time setup (submodules + GhosttyKit + git hooks) |
 | `./scripts/reload.sh --tag <tag>` | Build Debug app (pass `--launch` to also open it) |
 | `./scripts/reloadp.sh` | Build and launch the Release app |

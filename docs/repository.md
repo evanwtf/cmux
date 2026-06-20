@@ -85,10 +85,17 @@ It is a polyglot monorepo. The macOS and iOS apps are the primary product; the o
 
 ## Quick start (build the macOS app from source)
 
+One command, no flags — runs setup and builds an isolated Debug app (tag `local`), then prints an `App path:` line to cmd-click:
+
 ```bash
 git clone --recursive https://github.com/manaflow-ai/cmux.git
 cd cmux
+./scripts/build-macos.sh
+```
 
+For iterative development, run the steps directly so each branch gets its own isolated build:
+
+```bash
 # One-time: init submodules, build/cache GhosttyKit, install the pbxproj pre-commit hook
 ./scripts/setup.sh
 
@@ -99,7 +106,7 @@ cd cmux
 ./scripts/reload.sh --tag my-feature --launch
 ```
 
-Always build through `./scripts/reload.sh --tag <tag>`. Never run a bare `xcodebuild` or open an untagged `cmux DEV.app` — untagged builds share the default debug socket and bundle ID with other instances and steal focus. Full rationale and the tagged-socket dogfood helper (`CMUX_TAG=<tag> scripts/cmux-debug-cli.sh …`) are in [`CLAUDE.md`](../CLAUDE.md).
+Always build through `build-macos.sh` or `./scripts/reload.sh --tag <tag>`. Never run a bare `xcodebuild` or open an untagged `cmux DEV.app` — untagged builds share the default debug socket and bundle ID with other instances and steal focus. Full rationale and the tagged-socket dogfood helper (`CMUX_TAG=<tag> scripts/cmux-debug-cli.sh …`) are in [`CLAUDE.md`](../CLAUDE.md).
 
 ### Building on macOS 26+ (Tahoe)
 
@@ -109,6 +116,7 @@ The pinned compiler **zig 0.15.2 cannot link the Ghostty CLI helper against the 
 
 | Task | Command | Notes |
 | ---- | ------- | ----- |
+| Build (one command, no flags) | `./scripts/build-macos.sh` | Setup + Debug build, tag `local`; `CMUX_TAG=<name>` for a second build |
 | One-time setup | `./scripts/setup.sh` | Submodules + GhosttyKit + git hooks |
 | Build Debug app | `./scripts/reload.sh --tag <tag>` | Add `--launch` to open it |
 | Build + launch Release | `./scripts/reloadp.sh` | |
