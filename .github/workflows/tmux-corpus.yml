@@ -11,8 +11,6 @@ on:
         description: Time per Go fuzz target
         required: false
         default: 2m
-  schedule:
-    - cron: "17 10 * * *"
 
 permissions:
   actions: write
@@ -60,7 +58,7 @@ jobs:
           done
 
   terminal-nightly:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ${{ vars.MACOS_RUNNER_15 || 'warp-macos-15-arm64-6x' }}
     timeout-minutes: 30
     env:
